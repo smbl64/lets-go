@@ -1,0 +1,12 @@
+version: "3.2"
+
+services:
+  mysql:
+    image: mysql:5.7
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: snippet
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
