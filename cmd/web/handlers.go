@@ -39,6 +39,7 @@ func (app *application) showSnippet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
 	title := "Some new fancy snippet"
 	content := "Hey there, I just made a new snippet!!"
 	expires := "6"
@@ -52,4 +53,5 @@ func (app *application) createSnippet(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) createSnippetForm(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "create.page.tmpl", nil)
 }
