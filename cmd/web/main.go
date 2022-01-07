@@ -62,10 +62,13 @@ func main() {
 	}
 
 	srv := &http.Server{
-		Addr:      *addr,
-		Handler:   app.routes(),
-		ErrorLog:  app.errorLog,
-		TLSConfig: tlsConfig,
+		Addr:         *addr,
+		Handler:      app.routes(),
+		ErrorLog:     app.errorLog,
+		TLSConfig:    tlsConfig,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	app.infoLog.Printf("Starting server on %s\n", *addr)
