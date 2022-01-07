@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"database/sql"
 	"flag"
 	"html/template"
@@ -56,13 +57,18 @@ func main() {
 		templateCache: templateCache,
 	}
 
-	app.infoLog.Printf("Starting server on %s\n", *addr)
-	srv := &http.Server{
-		Addr:     *addr,
-		Handler:  app.routes(),
-		ErrorLog: app.errorLog,
+	tlsConfig := &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
 
+	srv := &http.Server{
+		Addr:      *addr,
+		Handler:   app.routes(),
+		ErrorLog:  app.errorLog,
+		TLSConfig: tlsConfig,
+	}
+
+	app.infoLog.Printf("Starting server on %s\n", *addr)
 	err = srv.ListenAndServeTLS("tls/cert.pem", "tls/key.pem")
 	app.errorLog.Fatal(err)
 }
