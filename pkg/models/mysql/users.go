@@ -63,5 +63,16 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 }
 
 func (m *UserModel) Get(id int) (*models.User, error) {
-	return nil, nil
+	query := `SELECT id, name, email, created, active FROM users WHERE id = ?`
+	row := m.DB.QueryRow(query, id)
+	u := &models.User{}
+	err := row.Scan(&u.ID, &u.Name, &u.Email, &u.Created, &u.Active)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, models.ErrNoRecord
+		}
+		return nil, err
+	}
+
+	return u, nil
 }

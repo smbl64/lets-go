@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
+	"banisaeid.com/letsgo/pkg/models"
 	"github.com/justinas/nosurf"
 )
 
@@ -59,4 +62,33 @@ func noSurf(next http.Handler) http.Handler {
 	})
 
 	return csrfHandler
+}
+
+func (app *application) authenicate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		exists := app.session.Exists(r, "authenticatedUserID")
+		if !exists {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		usr, err := app.users.Get(app.session.GetInt(r, "authenticatedUserID"))
+		if err != nil {
+			if errors.Is(err, models.ErrNoRecord) {
+				app.session.Remove(r, "authenticatedUserID")
+			}
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		if !usr.Active {
+			app.session.Remove(r, "authenticatedUserID")
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), contextKeyIsAuthenticated, true)
+		next.ServeHTTP(w, r.WithContext(ctx))
+
+	})
 }
